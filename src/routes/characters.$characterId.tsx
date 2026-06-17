@@ -4,7 +4,7 @@ import { SiteNav } from "../components/SiteNav";
 import { CharacterPortrait } from "../components/CharacterPortrait";
 import { PowerBadge } from "../components/PowerBadge";
 import { RelatedCharacterCard } from "../components/RelatedCharacterCard";
-import { getCharacter } from "../data/characters";
+import { getCharacter, type Character } from "../data/characters";
 import { useFavorites, useCompare } from "../lib/favorites";
 
 export const Route = createFileRoute("/characters/$characterId")({
@@ -60,7 +60,7 @@ export const Route = createFileRoute("/characters/$characterId")({
 });
 
 function CharacterPage() {
-  const c = Route.useLoaderData();
+  const c = Route.useLoaderData() as Character;
   const fav = useFavorites();
   const cmp = useCompare();
   const isFav = fav.has(c.id);
