@@ -8,7 +8,7 @@ import { getCharacter } from "../data/characters";
 import { useFavorites, useCompare } from "../lib/favorites";
 
 export const Route = createFileRoute("/characters/$characterId")({
-  loader: ({ params }) => {
+  loader: ({ params }): import("../data/characters").Character => {
     const character = getCharacter(params.characterId);
     if (!character) throw notFound();
     return character;
