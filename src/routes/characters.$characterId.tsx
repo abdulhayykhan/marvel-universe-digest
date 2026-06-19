@@ -114,7 +114,7 @@ function CharacterPage() {
               </div>
             </div>
             <div className="brutal-border-4 brutal-shadow-lg w-full overflow-hidden bg-marvel-black md:w-80">
-              <CharacterPortrait alias={c.alias} id={c.id} size="hero" />
+              <CharacterPortrait alias={c.alias} id={c.id} name={c.name} size="hero" />
             </div>
           </div>
         </section>
