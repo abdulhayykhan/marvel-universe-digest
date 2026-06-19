@@ -59,11 +59,12 @@ async function resolveImage(alias: string, name?: string): Promise<string | null
   if (inflight.has(key)) return inflight.get(key)!;
 
   const terms = [
-    alias,
     `${alias} (Marvel Cinematic Universe)`,
     `${alias} (Marvel Comics)`,
+    `${alias} (Marvel Comics character)`,
     `${alias} (character)`,
     `${alias} (comics)`,
+    alias,
     ...(name ? [name] : []),
   ];
 
