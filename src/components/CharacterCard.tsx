@@ -24,7 +24,7 @@ export function CharacterCard({ character }: { character: Character }) {
         {isFav ? "★" : "☆"}
       </button>
 
-      <CharacterPortrait alias={character.alias} id={character.id} />
+      <CharacterPortrait alias={character.alias} id={character.id} name={character.name} />
 
       <div className="flex flex-1 flex-col gap-2 border-t-4 border-marvel-black bg-marvel-black p-4">
         <div className="min-w-0">

@@ -35,7 +35,7 @@ export function RelatedCharacterCard({ id, kind }: { id: string; kind: "ally" | 
       className="brutal-border brutal-shadow-sm brutal-hover flex items-center gap-3 bg-marvel-white p-3"
     >
       <div className="brutal-border h-14 w-14 shrink-0 overflow-hidden" style={{ borderWidth: 2 }}>
-        <CharacterPortrait alias={c.alias} id={c.id} size="sm" />
+        <CharacterPortrait alias={c.alias} id={c.id} name={c.name} size="sm" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate font-display text-lg uppercase leading-none">{c.alias}</p>
