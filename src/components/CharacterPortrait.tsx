@@ -29,61 +29,96 @@ function initials(alias: string) {
   return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
-// in-memory cache shared across renders/instances
 const imageCache = new Map<string, string | null>();
 const inflight = new Map<string, Promise<string | null>>();
 
-async function fetchWikiThumb(query: string): Promise<string | null> {
-  if (imageCache.has(query)) return imageCache.get(query)!;
-  if (inflight.has(query)) return inflight.get(query)!;
+async function fetchOne(term: string): Promise<string | null> {
+  try {
+    const slug = encodeURIComponent(term.replace(/\s+/g, "_"));
+    const res = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${slug}`,
+      { headers: { Accept: "application/json" } }
+    );
+    if (!res.ok) return null;
+    const json = (await res.json()) as {
+      type?: string;
+      thumbnail?: { source?: string; width?: number; height?: number };
+      originalimage?: { source?: string };
+    };
+    if (json?.type === "disambiguation") return null;
+    const src = json?.thumbnail?.source || json?.originalimage?.source || null;
+    return src ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function resolveImage(alias: string, name?: string): Promise<string | null> {
+  const key = `${alias}|${name ?? ""}`;
+  if (imageCache.has(key)) return imageCache.get(key)!;
+  if (inflight.has(key)) return inflight.get(key)!;
+
+  const terms = [
+    `${alias} (Marvel Cinematic Universe)`,
+    `${alias} (Marvel Comics)`,
+    `${alias} (character)`,
+    `${alias} (comics)`,
+    alias,
+    ...(name ? [name] : []),
+  ];
 
   const p = (async () => {
-    try {
-      const slug = encodeURIComponent(query.replace(/\s+/g, "_"));
-      const res = await fetch(
-        `https://en.wikipedia.org/api/rest_v1/page/summary/${slug}`,
-        { headers: { Accept: "application/json" } }
-      );
-      if (!res.ok) throw new Error(String(res.status));
-      const json = (await res.json()) as { thumbnail?: { source?: string } };
-      const src = json?.thumbnail?.source ?? null;
-      imageCache.set(query, src);
-      return src;
-    } catch {
-      imageCache.set(query, null);
-      return null;
-    } finally {
-      inflight.delete(query);
+    for (const t of terms) {
+      const src = await fetchOne(t);
+      if (src) {
+        imageCache.set(key, src);
+        return src;
+      }
     }
-  })();
-  inflight.set(query, p);
+    imageCache.set(key, null);
+    return null;
+  })().finally(() => {
+    inflight.delete(key);
+  });
+  inflight.set(key, p);
   return p;
 }
 
 export function CharacterPortrait({ alias, id, name, size = "card", className = "" }: Props) {
   const palette = PALETTES[hash(id) % PALETTES.length];
   const text = initials(alias);
-  const query = (name && name.trim()) || alias;
-  const [imgSrc, setImgSrc] = useState<string | null>(() => imageCache.get(query) ?? null);
-  const [errored, setErrored] = useState(false);
+  const cacheKey = `${alias}|${name ?? ""}`;
+  const cached = imageCache.has(cacheKey) ? imageCache.get(cacheKey)! : undefined;
+
+  const [imgSrc, setImgSrc] = useState<string | null>(cached ?? null);
+  const [status, setStatus] = useState<"loading" | "loaded" | "error">(
+    cached === undefined ? "loading" : cached ? "loaded" : "error"
+  );
 
   useEffect(() => {
     let cancelled = false;
-    if (imageCache.has(query)) {
-      setImgSrc(imageCache.get(query)!);
-      setErrored(false);
+    if (imageCache.has(cacheKey)) {
+      const v = imageCache.get(cacheKey)!;
+      setImgSrc(v);
+      setStatus(v ? "loaded" : "error");
       return;
     }
-    fetchWikiThumb(query).then((src) => {
-      if (!cancelled) {
+    setStatus("loading");
+    setImgSrc(null);
+    resolveImage(alias, name).then((src) => {
+      if (cancelled) return;
+      if (src) {
         setImgSrc(src);
-        setErrored(false);
+        setStatus("loaded");
+      } else {
+        setImgSrc(null);
+        setStatus("error");
       }
     });
     return () => {
       cancelled = true;
     };
-  }, [query]);
+  }, [alias, name, cacheKey]);
 
   const dims =
     size === "hero"
@@ -93,46 +128,55 @@ export function CharacterPortrait({ alias, id, name, size = "card", className = 
       : "h-40 sm:h-48 text-6xl sm:text-7xl";
 
   const pattern = `radial-gradient(${palette.accent} 1.5px, transparent 1.5px)`;
-  const showImage = imgSrc && !errored;
+
+  const renderFallback = () => (
+    <>
+      <div
+        className="absolute inset-0 opacity-30"
+        style={{ backgroundImage: pattern, backgroundSize: "14px 14px" }}
+      />
+      <div
+        className="absolute -right-6 -top-6 h-24 w-24 rotate-45"
+        style={{ backgroundColor: palette.accent }}
+      />
+      <div
+        className="absolute -left-4 -bottom-4 h-16 w-16"
+        style={{ backgroundColor: palette.accent }}
+      />
+      <div className="relative flex h-full w-full items-center justify-center">
+        <span
+          className="font-display font-black leading-none tracking-tight"
+          style={{ color: palette.fg, WebkitTextStroke: `2px ${palette.accent}` }}
+        >
+          {text}
+        </span>
+      </div>
+    </>
+  );
 
   return (
     <div
       className={`relative w-full overflow-hidden ${dims} ${className}`}
-      style={{ backgroundColor: palette.bg }}
+      style={{ backgroundColor: status === "loaded" ? "#0D0D0D" : palette.bg }}
       aria-hidden="true"
     >
-      {showImage ? (
+      {status === "loading" && (
+        <div className="absolute inset-0 animate-pulse bg-neutral-700" />
+      )}
+      {status === "loaded" && imgSrc && (
         <img
-          src={imgSrc!}
+          src={imgSrc}
           alt=""
           loading="lazy"
           className="absolute inset-0 h-full w-full object-cover"
-          onError={() => setErrored(true)}
+          onError={() => {
+            imageCache.set(cacheKey, null);
+            setImgSrc(null);
+            setStatus("error");
+          }}
         />
-      ) : (
-        <>
-          <div
-            className="absolute inset-0 opacity-30"
-            style={{ backgroundImage: pattern, backgroundSize: "14px 14px" }}
-          />
-          <div
-            className="absolute -right-6 -top-6 h-24 w-24 rotate-45"
-            style={{ backgroundColor: palette.accent }}
-          />
-          <div
-            className="absolute -left-4 -bottom-4 h-16 w-16"
-            style={{ backgroundColor: palette.accent }}
-          />
-          <div className="relative flex h-full w-full items-center justify-center">
-            <span
-              className="font-display font-black leading-none tracking-tight"
-              style={{ color: palette.fg, WebkitTextStroke: `2px ${palette.accent}` }}
-            >
-              {text}
-            </span>
-          </div>
-        </>
       )}
+      {status === "error" && renderFallback()}
     </div>
   );
 }
