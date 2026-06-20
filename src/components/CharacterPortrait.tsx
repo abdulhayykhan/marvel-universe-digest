@@ -176,6 +176,7 @@ export function CharacterPortrait({ alias, id, name, size = "card", className = 
           alt=""
           loading="lazy"
           className="absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition: "center top" }}
           onError={() => {
             imageCache.set(cacheKey, null);
             setImgSrc(null);
