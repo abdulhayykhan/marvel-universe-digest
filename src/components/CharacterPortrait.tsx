@@ -43,9 +43,15 @@ async function fetchOne(term: string): Promise<string | null> {
     const json = (await res.json()) as {
       type?: string;
       thumbnail?: { source?: string; width?: number; height?: number };
-      originalimage?: { source?: string };
+      originalimage?: { source?: string; width?: number; height?: number };
     };
     if (json?.type === "disambiguation") return null;
+    // Reject collages / multi-panel grids by aspect ratio of the source image
+    const orig = json?.originalimage;
+    if (orig?.width && orig?.height) {
+      const ratio = orig.width / orig.height;
+      if (ratio < 0.5 || ratio > 1.6) return null;
+    }
     const src = json?.thumbnail?.source || json?.originalimage?.source || null;
     return src ?? null;
   } catch {
