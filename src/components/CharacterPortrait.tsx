@@ -45,6 +45,8 @@ const BAD_KEYWORDS = [
   "gallery of",
 ];
 
+const GENERIC_TITLE_KEYWORDS = ["topics referred to by", "list of", "disambiguation"];
+
 const BAD_FILENAME_TOKENS = [
   "grid",
   "collage",
@@ -91,10 +93,14 @@ async function fetchOne(term: string): Promise<string | null> {
       type?: string;
       extract?: string;
       description?: string;
+      title?: string;
       thumbnail?: { source?: string; width?: number; height?: number };
       originalimage?: { source?: string; width?: number; height?: number };
     };
     if (json?.type === "disambiguation") return null;
+
+    const titleText = `${json?.title ?? ""} ${json?.description ?? ""}`.toLowerCase();
+    if (GENERIC_TITLE_KEYWORDS.some((k) => titleText.includes(k))) return null;
 
     const dims =
       json?.originalimage?.width && json?.originalimage?.height
@@ -103,7 +109,7 @@ async function fetchOne(term: string): Promise<string | null> {
     if (dims?.width && dims?.height) {
       const ratio = dims.width / dims.height;
       // Allow portraits and cinematic stills, while rejecting obvious banners/grids.
-      if (ratio < 0.5 || ratio > 1.85) return null;
+      if (ratio < 0.45 || ratio > 1.95) return null;
     }
 
     const text = `${json?.extract ?? ""} ${json?.description ?? ""}`.toLowerCase();
