@@ -39,6 +39,10 @@ const BAD_KEYWORDS = [
   "collage",
   "montage",
   "compilation",
+  "various incarnations",
+  "various versions",
+  "multiple versions",
+  "gallery of",
 ];
 
 const BAD_FILENAME_TOKENS = [
@@ -46,6 +50,11 @@ const BAD_FILENAME_TOKENS = [
   "collage",
   "montage",
   "compilation",
+  "incarnations",
+  "_various",
+  "-various",
+  "variants",
+  "gallery",
   "_and_",
   "-and-",
   "_vs_",
@@ -81,16 +90,16 @@ async function fetchOne(term: string): Promise<string | null> {
     };
     if (json?.type === "disambiguation") return null;
 
-    // Aspect-ratio filter (tightened): use original dims if present, else thumbnail.
-    const dims = json?.originalimage?.width && json?.originalimage?.height
-      ? json.originalimage
-      : json?.thumbnail;
+    const dims =
+      json?.originalimage?.width && json?.originalimage?.height
+        ? json.originalimage
+        : json?.thumbnail;
     if (dims?.width && dims?.height) {
       const ratio = dims.width / dims.height;
-      if (ratio < 0.6 || ratio > 1.5) return null;
+      // Strict portrait/square only — collages tend to be wider or weirdly tall.
+      if (ratio < 0.55 || ratio > 1.4) return null;
     }
 
-    // Text-based rejection
     const text = `${json?.extract ?? ""} ${json?.description ?? ""}`.toLowerCase();
     if (BAD_KEYWORDS.some((k) => text.includes(k))) return null;
 
@@ -103,18 +112,38 @@ async function fetchOne(term: string): Promise<string | null> {
   }
 }
 
-// Per-character overrides for cases where general Wikipedia returns collages/wrong subject.
+// Direct Wikipedia page titles for characters where the generic cascade fails
+// or returns collages. These are tried FIRST.
 const QUERY_OVERRIDES: Record<string, string[]> = {
-  Hulk: ["Hulk (Marvel Cinematic Universe)", "Hulk (comics)"],
+  Hulk: ["Hulk (Marvel Cinematic Universe)", "Bruce Banner (Marvel Cinematic Universe)"],
   "Black Widow": [
     "Black Widow (Natasha Romanova)",
-    "Black Widow (Marvel Cinematic Universe)",
+    "Natasha Romanoff (Marvel Cinematic Universe)",
   ],
   Loki: [
     "Loki (Marvel Cinematic Universe)",
     "Loki (TV series)",
-    "Loki (comics)",
   ],
+  "She-Hulk": ["Jennifer Walters", "She-Hulk: Attorney at Law"],
+  Deadpool: ["Deadpool", "Deadpool (film)"],
+  Storm: ["Storm (Marvel Comics)"],
+  Magneto: ["Magneto (Marvel Comics)"],
+  "Professor X": ["Professor X", "Charles Xavier"],
+  Gamora: ["Gamora"],
+  "Rocket Raccoon": ["Rocket Raccoon"],
+  Groot: ["Groot"],
+  "Star-Lord": ["Star-Lord", "Peter Quill"],
+  "Nick Fury": ["Nick Fury", "Nick Fury (Marvel Cinematic Universe)"],
+  "Shang-Chi": ["Shang-Chi", "Shang-Chi (Marvel Cinematic Universe)"],
+  Daredevil: ["Daredevil (Marvel Comics character)", "Matt Murdock"],
+  "Moon Knight": ["Moon Knight"],
+  "Ms. Marvel": ["Ms. Marvel (Kamala Khan)", "Kamala Khan"],
+  Nebula: ["Nebula (character)", "Nebula (Marvel Cinematic Universe)"],
+  "War Machine": ["War Machine", "James Rhodes (Marvel Cinematic Universe)"],
+  "Winter Soldier": ["Bucky Barnes", "Winter Soldier (comics)"],
+  Wolverine: ["Wolverine (character)"],
+  Vision: ["Vision (Marvel Comics)"],
+  "Captain America": ["Captain America", "Steve Rogers (Marvel Cinematic Universe)"],
 };
 
 async function resolveImage(alias: string, name?: string): Promise<string | null> {
@@ -127,9 +156,8 @@ async function resolveImage(alias: string, name?: string): Promise<string | null
     ...overrides,
     `${alias} (Marvel Cinematic Universe)`,
     `${alias} (Marvel Comics)`,
-    `${alias} (Marvel Comics character)`,
-    `${alias} (character)`,
     `${alias} (comics)`,
+    `${alias} (character)`,
     alias,
     ...(name ? [name] : []),
   ];
@@ -144,7 +172,7 @@ async function resolveImage(alias: string, name?: string): Promise<string | null
         }
       }
     } catch {
-      // swallow — fall through to null
+      // swallow
     }
     imageCache.set(key, null);
     return null;
@@ -205,10 +233,15 @@ export function CharacterPortrait({ alias, id, name, size = "card", className = 
       style={{ backgroundColor: palette.bg }}
       aria-hidden="true"
     >
-      {/* Always-rendered brutalist fallback (base layer — guarantees no blank box) */}
+      {/* GUARANTEED FALLBACK — always painted underneath everything. */}
       <div
-        className="absolute inset-0 opacity-30"
-        style={{ backgroundImage: pattern, backgroundSize: "14px 14px" }}
+        className="absolute inset-0"
+        style={{
+          backgroundColor: palette.bg,
+          backgroundImage: pattern,
+          backgroundSize: "14px 14px",
+          opacity: 0.55,
+        }}
       />
       <div
         className="absolute -right-6 -top-6 h-24 w-24 rotate-45"
