@@ -121,35 +121,45 @@ async function fetchOne(term: string): Promise<string | null> {
 // Direct Wikipedia page titles for characters where the generic cascade fails
 // or returns collages. These are tried FIRST.
 const QUERY_OVERRIDES: Record<string, string[]> = {
-  Hulk: ["Hulk (Marvel Cinematic Universe)", "Bruce Banner (Marvel Cinematic Universe)"],
+  "Iron Man": ["Tony Stark (Marvel Cinematic Universe)", "Iron Man (Marvel Cinematic Universe)"],
+  "Captain America": ["Steve Rogers (Marvel Cinematic Universe)"],
+  Thor: ["Thor (Marvel Cinematic Universe)"],
+  Hulk: ["Bruce Banner (Marvel Cinematic Universe)", "Hulk (Marvel Cinematic Universe)"],
   "Black Widow": [
-    "Black Widow (Natasha Romanova)",
     "Natasha Romanoff (Marvel Cinematic Universe)",
+    "Black Widow (Natasha Romanova)",
   ],
-  Loki: [
-    "Loki (Marvel Cinematic Universe)",
-    "Loki (TV series)",
-  ],
-  "She-Hulk": ["Jennifer Walters", "She-Hulk: Attorney at Law"],
-  Deadpool: ["Deadpool", "Deadpool (film)"],
-  Storm: ["Storm (Marvel Comics)"],
-  Magneto: ["Magneto (Marvel Comics)"],
-  "Professor X": ["Professor X", "Charles Xavier"],
-  Gamora: ["Gamora"],
-  "Rocket Raccoon": ["Rocket Raccoon"],
-  Groot: ["Groot"],
-  "Star-Lord": ["Star-Lord", "Peter Quill"],
-  "Nick Fury": ["Nick Fury", "Nick Fury (Marvel Cinematic Universe)"],
-  "Shang-Chi": ["Shang-Chi", "Shang-Chi (Marvel Cinematic Universe)"],
-  Daredevil: ["Daredevil (Marvel Comics character)", "Matt Murdock"],
-  "Moon Knight": ["Moon Knight"],
-  "Ms. Marvel": ["Ms. Marvel (Kamala Khan)", "Kamala Khan"],
-  Nebula: ["Nebula (character)", "Nebula (Marvel Cinematic Universe)"],
-  "War Machine": ["War Machine", "James Rhodes (Marvel Cinematic Universe)"],
-  "Winter Soldier": ["Bucky Barnes", "Winter Soldier (comics)"],
-  Wolverine: ["Wolverine (character)"],
-  Vision: ["Vision (Marvel Comics)"],
-  "Captain America": ["Captain America", "Steve Rogers (Marvel Cinematic Universe)"],
+  Hawkeye: ["Clint Barton (Marvel Cinematic Universe)"],
+  "Spider-Man": ["Peter Parker (Marvel Cinematic Universe)"],
+  "Doctor Strange": ["Stephen Strange (Marvel Cinematic Universe)"],
+  "Black Panther": ["T'Challa (Marvel Cinematic Universe)"],
+  "Captain Marvel": ["Carol Danvers (Marvel Cinematic Universe)"],
+  "Ant-Man": ["Scott Lang (Marvel Cinematic Universe)"],
+  "Scarlet Witch": ["Wanda Maximoff (Marvel Cinematic Universe)"],
+  Vision: ["Vision (Marvel Cinematic Universe)", "Vision (Marvel Comics)"],
+  Loki: ["Loki (Marvel Cinematic Universe)"],
+  Thanos: ["Thanos (Marvel Cinematic Universe)"],
+  Wolverine: ["Logan (film character)", "Wolverine (character)"],
+  Deadpool: ["Wade Wilson (film character)", "Deadpool", "Deadpool (film)"],
+  Storm: ["Storm (film character)", "Storm (Marvel Comics)"],
+  Magneto: ["Magneto (film character)", "Erik Lehnsherr (film character)"],
+  "Professor X": ["Charles Xavier (film character)", "Professor X", "Charles Xavier"],
+  Gamora: ["Gamora (Marvel Cinematic Universe)", "Gamora"],
+  "Rocket Raccoon": ["Rocket Raccoon (Marvel Cinematic Universe)", "Rocket (Marvel Cinematic Universe)", "Rocket Raccoon"],
+  Groot: ["Groot (Marvel Cinematic Universe)", "Groot"],
+  "Star-Lord": ["Star-Lord (Marvel Cinematic Universe)", "Peter Quill (Marvel Cinematic Universe)", "Star-Lord", "Peter Quill"],
+  "Nick Fury": ["Nick Fury (Marvel Cinematic Universe)", "Nick Fury"],
+  "Shang-Chi": ["Shang-Chi (Marvel Cinematic Universe)", "Shang-Chi"],
+  Daredevil: ["Matt Murdock (Marvel Cinematic Universe)", "Daredevil (Marvel Comics character)", "Matt Murdock"],
+  "Moon Knight": ["Marc Spector (Marvel Cinematic Universe)", "Moon Knight"],
+  "She-Hulk": ["She-Hulk: Attorney at Law", "Jennifer Walters"],
+  "Ms. Marvel": ["Kamala Khan (Marvel Cinematic Universe)", "Ms. Marvel (Kamala Khan)", "Kamala Khan"],
+  Nebula: ["Nebula (Marvel Cinematic Universe)", "Nebula (character)"],
+  "War Machine": ["War Machine (Marvel Cinematic Universe)", "James Rhodes (Marvel Cinematic Universe)", "War Machine"],
+  "Falcon / Captain America": ["Sam Wilson (Marvel Cinematic Universe)"],
+  "Winter Soldier": ["Bucky Barnes (Marvel Cinematic Universe)", "Bucky Barnes", "Winter Soldier (comics)"],
+  Kingpin: ["Wilson Fisk (Marvel Cinematic Universe)", "Kingpin (character)"],
+  "Green Goblin": ["Norman Osborn (2002 film series character)", "Green Goblin"],
 };
 
 async function resolveImage(alias: string, name?: string): Promise<string | null> {
@@ -170,6 +180,11 @@ async function resolveImage(alias: string, name?: string): Promise<string | null
 
   const p = (async () => {
     try {
+      const direct = DIRECT_IMAGE_OVERRIDES[alias];
+      if (direct) {
+        imageCache.set(key, direct);
+        return direct;
+      }
       for (const t of terms) {
         const src = await fetchOne(t);
         if (src) {
