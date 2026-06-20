@@ -32,6 +32,38 @@ function initials(alias: string) {
 const imageCache = new Map<string, string | null>();
 const inflight = new Map<string, Promise<string | null>>();
 
+const BAD_KEYWORDS = [
+  "fan art",
+  "fan-art",
+  "cosplay",
+  "collage",
+  "montage",
+  "compilation",
+];
+
+const BAD_FILENAME_TOKENS = [
+  "grid",
+  "collage",
+  "montage",
+  "compilation",
+  "_and_",
+  "-and-",
+  "_vs_",
+  "-vs-",
+  "_vs.",
+];
+
+function filenameLooksBad(url: string) {
+  try {
+    const path = decodeURIComponent(new URL(url).pathname).toLowerCase();
+    const file = path.split("/").pop() || path;
+    return BAD_FILENAME_TOKENS.some((tok) => file.includes(tok));
+  } catch {
+    const lower = url.toLowerCase();
+    return BAD_FILENAME_TOKENS.some((tok) => lower.includes(tok));
+  }
+}
+
 async function fetchOne(term: string): Promise<string | null> {
   try {
     const slug = encodeURIComponent(term.replace(/\s+/g, "_"));
@@ -42,29 +74,57 @@ async function fetchOne(term: string): Promise<string | null> {
     if (!res.ok) return null;
     const json = (await res.json()) as {
       type?: string;
+      extract?: string;
+      description?: string;
       thumbnail?: { source?: string; width?: number; height?: number };
       originalimage?: { source?: string; width?: number; height?: number };
     };
     if (json?.type === "disambiguation") return null;
-    // Reject collages / multi-panel grids by aspect ratio of the source image
-    const orig = json?.originalimage;
-    if (orig?.width && orig?.height) {
-      const ratio = orig.width / orig.height;
-      if (ratio < 0.5 || ratio > 1.6) return null;
+
+    // Aspect-ratio filter (tightened): use original dims if present, else thumbnail.
+    const dims = json?.originalimage?.width && json?.originalimage?.height
+      ? json.originalimage
+      : json?.thumbnail;
+    if (dims?.width && dims?.height) {
+      const ratio = dims.width / dims.height;
+      if (ratio < 0.6 || ratio > 1.5) return null;
     }
+
+    // Text-based rejection
+    const text = `${json?.extract ?? ""} ${json?.description ?? ""}`.toLowerCase();
+    if (BAD_KEYWORDS.some((k) => text.includes(k))) return null;
+
     const src = json?.thumbnail?.source || json?.originalimage?.source || null;
-    return src ?? null;
+    if (!src) return null;
+    if (filenameLooksBad(src)) return null;
+    return src;
   } catch {
     return null;
   }
 }
+
+// Per-character overrides for cases where general Wikipedia returns collages/wrong subject.
+const QUERY_OVERRIDES: Record<string, string[]> = {
+  Hulk: ["Hulk (Marvel Cinematic Universe)", "Hulk (comics)"],
+  "Black Widow": [
+    "Black Widow (Natasha Romanova)",
+    "Black Widow (Marvel Cinematic Universe)",
+  ],
+  Loki: [
+    "Loki (Marvel Cinematic Universe)",
+    "Loki (TV series)",
+    "Loki (comics)",
+  ],
+};
 
 async function resolveImage(alias: string, name?: string): Promise<string | null> {
   const key = `${alias}|${name ?? ""}`;
   if (imageCache.has(key)) return imageCache.get(key)!;
   if (inflight.has(key)) return inflight.get(key)!;
 
+  const overrides = QUERY_OVERRIDES[alias] ?? [];
   const terms = [
+    ...overrides,
     `${alias} (Marvel Cinematic Universe)`,
     `${alias} (Marvel Comics)`,
     `${alias} (Marvel Comics character)`,
@@ -75,12 +135,16 @@ async function resolveImage(alias: string, name?: string): Promise<string | null
   ];
 
   const p = (async () => {
-    for (const t of terms) {
-      const src = await fetchOne(t);
-      if (src) {
-        imageCache.set(key, src);
-        return src;
+    try {
+      for (const t of terms) {
+        const src = await fetchOne(t);
+        if (src) {
+          imageCache.set(key, src);
+          return src;
+        }
       }
+    } catch {
+      // swallow — fall through to null
     }
     imageCache.set(key, null);
     return null;
@@ -93,35 +157,34 @@ async function resolveImage(alias: string, name?: string): Promise<string | null
 
 export function CharacterPortrait({ alias, id, name, size = "card", className = "" }: Props) {
   const palette = PALETTES[hash(id) % PALETTES.length];
-  const text = initials(alias);
+  const text = initials(alias) || "??";
   const cacheKey = `${alias}|${name ?? ""}`;
   const cached = imageCache.has(cacheKey) ? imageCache.get(cacheKey)! : undefined;
 
   const [imgSrc, setImgSrc] = useState<string | null>(cached ?? null);
-  const [status, setStatus] = useState<"loading" | "loaded" | "error">(
-    cached === undefined ? "loading" : cached ? "loaded" : "error"
-  );
+  const [imgOk, setImgOk] = useState<boolean>(!!cached);
 
   useEffect(() => {
     let cancelled = false;
     if (imageCache.has(cacheKey)) {
       const v = imageCache.get(cacheKey)!;
       setImgSrc(v);
-      setStatus(v ? "loaded" : "error");
+      setImgOk(!!v);
       return;
     }
-    setStatus("loading");
     setImgSrc(null);
-    resolveImage(alias, name).then((src) => {
-      if (cancelled) return;
-      if (src) {
+    setImgOk(false);
+    resolveImage(alias, name)
+      .then((src) => {
+        if (cancelled) return;
         setImgSrc(src);
-        setStatus("loaded");
-      } else {
+        setImgOk(!!src);
+      })
+      .catch(() => {
+        if (cancelled) return;
         setImgSrc(null);
-        setStatus("error");
-      }
-    });
+        setImgOk(false);
+      });
     return () => {
       cancelled = true;
     };
@@ -136,8 +199,13 @@ export function CharacterPortrait({ alias, id, name, size = "card", className = 
 
   const pattern = `radial-gradient(${palette.accent} 1.5px, transparent 1.5px)`;
 
-  const renderFallback = () => (
-    <>
+  return (
+    <div
+      className={`relative w-full overflow-hidden ${dims} ${className}`}
+      style={{ backgroundColor: palette.bg }}
+      aria-hidden="true"
+    >
+      {/* Always-rendered brutalist fallback (base layer — guarantees no blank box) */}
       <div
         className="absolute inset-0 opacity-30"
         style={{ backgroundImage: pattern, backgroundSize: "14px 14px" }}
@@ -158,33 +226,22 @@ export function CharacterPortrait({ alias, id, name, size = "card", className = 
           {text}
         </span>
       </div>
-    </>
-  );
 
-  return (
-    <div
-      className={`relative w-full overflow-hidden ${dims} ${className}`}
-      style={{ backgroundColor: status === "loaded" ? "#0D0D0D" : palette.bg }}
-      aria-hidden="true"
-    >
-      {status === "loading" && (
-        <div className="absolute inset-0 animate-pulse bg-neutral-700" />
-      )}
-      {status === "loaded" && imgSrc && (
+      {/* Image overlay — only shown if a real source resolved AND loads without error */}
+      {imgSrc && imgOk && (
         <img
           src={imgSrc}
           alt=""
           loading="lazy"
           className="absolute inset-0 h-full w-full object-cover"
-          style={{ objectPosition: "center top" }}
+          style={{ objectPosition: "center top", backgroundColor: "#0D0D0D" }}
           onError={() => {
             imageCache.set(cacheKey, null);
+            setImgOk(false);
             setImgSrc(null);
-            setStatus("error");
           }}
         />
       )}
-      {status === "error" && renderFallback()}
     </div>
   );
 }
