@@ -55,12 +55,18 @@ const BAD_FILENAME_TOKENS = [
   "-various",
   "variants",
   "gallery",
-  "_and_",
-  "-and-",
   "_vs_",
   "-vs-",
   "_vs.",
+  "logo",
+  "poster",
 ];
+
+const DIRECT_IMAGE_OVERRIDES: Record<string, string> = {
+  // The Loki comics page thumbnail is a multi-panel collage; use the MCU infobox portrait directly.
+  Loki:
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Tom_Hiddleston_by_Gage_Skidmore.jpg/330px-Tom_Hiddleston_by_Gage_Skidmore.jpg",
+};
 
 function filenameLooksBad(url: string) {
   try {
@@ -96,14 +102,14 @@ async function fetchOne(term: string): Promise<string | null> {
         : json?.thumbnail;
     if (dims?.width && dims?.height) {
       const ratio = dims.width / dims.height;
-      // Strict portrait/square only — collages tend to be wider or weirdly tall.
-      if (ratio < 0.55 || ratio > 1.4) return null;
+      // Allow portraits and cinematic stills, while rejecting obvious banners/grids.
+      if (ratio < 0.5 || ratio > 1.85) return null;
     }
 
     const text = `${json?.extract ?? ""} ${json?.description ?? ""}`.toLowerCase();
     if (BAD_KEYWORDS.some((k) => text.includes(k))) return null;
 
-    const src = json?.thumbnail?.source || json?.originalimage?.source || null;
+    const src = json?.thumbnail?.source || null;
     if (!src) return null;
     if (filenameLooksBad(src)) return null;
     return src;
