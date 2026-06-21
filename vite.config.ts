@@ -12,4 +12,10 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Force nitro on outside the Lovable sandbox so `vite build` produces a
+  // deployable server bundle. Vercel auto-detection (VERCEL=1) selects the
+  // vercel preset; locally you can override via NITRO_PRESET.
+  nitro: {
+    preset: process.env.NITRO_PRESET || "vercel",
+  },
 });
