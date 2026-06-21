@@ -68,6 +68,10 @@ const DIRECT_IMAGE_OVERRIDES: Record<string, string> = {
   // The Loki comics page thumbnail is a multi-panel collage; use the MCU infobox portrait directly.
   Loki:
     "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Tom_Hiddleston_by_Gage_Skidmore.jpg/330px-Tom_Hiddleston_by_Gage_Skidmore.jpg",
+  // She-Hulk Wikipedia thumbnails are either a show logo or a "various incarnations" collage —
+  // use a Tatiana Maslany portrait directly.
+  "She-Hulk":
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Tatiana_Maslany_by_Gage_Skidmore_2.jpg/330px-Tatiana_Maslany_by_Gage_Skidmore_2.jpg",
 };
 
 function filenameLooksBad(url: string) {
