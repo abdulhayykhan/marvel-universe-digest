@@ -12,7 +12,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Browse 40+ Marvel heroes and villains. Search, filter by team, bookmark favorites, and compare characters side-by-side.",
+          "Browse 58 Marvel heroes and villains. Search, filter by team, bookmark favorites, and compare characters side-by-side.",
       },
       { property: "og:title", content: "Marvel Character Encyclopedia" },
       {
@@ -71,7 +71,7 @@ function BrowsePage() {
             </span>
           </h1>
           <p className="mt-4 max-w-2xl font-sans text-base text-marvel-white sm:text-lg">
-            40 heroes, villains, gods, mutants and cosmic weirdos. Search, filter, favorite,
+            58 heroes, villains, gods, mutants and cosmic weirdos. Search, filter, favorite,
             and pit them against each other.
           </p>
         </div>

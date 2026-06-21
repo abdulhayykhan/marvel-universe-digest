@@ -170,6 +170,23 @@ const QUERY_OVERRIDES: Record<string, string[]> = {
   "Winter Soldier": ["Bucky Barnes (Marvel Cinematic Universe)", "Bucky Barnes", "Winter Soldier (comics)"],
   Kingpin: ["Wilson Fisk (Marvel Cinematic Universe)", "Kingpin (character)"],
   "Green Goblin": ["Norman Osborn (2002 film series character)", "Green Goblin"],
+  Quicksilver: ["Pietro Maximoff (Marvel Cinematic Universe)", "Quicksilver (Marvel Comics)"],
+  "Yelena Belova": ["Yelena Belova (Marvel Cinematic Universe)", "Yelena Belova"],
+  Cyclops: ["Cyclops (Marvel Comics)", "Scott Summers"],
+  "Jean Grey": ["Jean Grey (Marvel Comics)", "Jean Grey"],
+  Beast: ["Beast (Marvel Comics)", "Hank McCoy"],
+  Mystique: ["Mystique (Marvel Comics)", "Raven Darkhölme"],
+  Cable: ["Cable (Marvel Comics)", "Cable (character)"],
+  "Adam Warlock": ["Adam Warlock (Marvel Cinematic Universe)", "Adam Warlock"],
+  Mantis: ["Mantis (Marvel Cinematic Universe)", "Mantis (Marvel Comics)"],
+  Drax: ["Drax the Destroyer (Marvel Cinematic Universe)", "Drax the Destroyer"],
+  "Silver Surfer": ["Silver Surfer (Marvel Cinematic Universe)", "Silver Surfer"],
+  Galactus: ["Galactus (Marvel Cinematic Universe)", "Galactus"],
+  "Baron Zemo": ["Helmut Zemo (Marvel Cinematic Universe)", "Baron Zemo"],
+  Mysterio: ["Mysterio (Marvel Cinematic Universe)", "Mysterio"],
+  MODOK: ["MODOK (Marvel Cinematic Universe)", "MODOK"],
+  Yondu: ["Yondu (Marvel Cinematic Universe)", "Yondu"],
+  Valkyrie: ["Valkyrie (Marvel Cinematic Universe)", "Valkyrie (Marvel Comics)"],
 };
 
 async function resolveImage(alias: string, name?: string): Promise<string | null> {

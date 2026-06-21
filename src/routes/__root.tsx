@@ -79,13 +79,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "A neobrutalist Marvel character database — browse, search, favorite, and compare 40+ heroes and villains.",
+          "A neobrutalist Marvel character database — browse, search, favorite, and compare 58 heroes and villains.",
       },
       { name: "theme-color", content: "#ED1D24" },
       { property: "og:title", content: "Marvel Character Encyclopedia" },
       {
         property: "og:description",
-        content: "Browse 40+ Marvel heroes and villains in a bold neobrutalist database.",
+        content: "Browse 58 Marvel heroes and villains in a bold neobrutalist database.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
