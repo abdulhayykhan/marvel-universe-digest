@@ -438,7 +438,7 @@ export const characters: Character[] = [
     bio: "A sentient tree-being from Planet X with a three-word vocabulary and an enormous heart, Groot regrows from a single twig.",
     powers: ["Plant Manipulation", "Regeneration", "Superhuman Strength", "Body Extension"],
     affiliation: ["Guardians of the Galaxy"],
-    allies: ["rocket-raccoon", "star-lord", "gamora", "thor"],
+    allies: ["rocket-raccoon", "star-lord", "gamora", "thor", "drax", "mantis"],
     enemies: ["thanos", "ronan"],
     mcu_appearances: [
       { title: "Guardians of the Galaxy", year: 2014, role: "Supporting", actor: "Vin Diesel" },
