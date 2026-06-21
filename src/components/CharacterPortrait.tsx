@@ -71,7 +71,7 @@ const DIRECT_IMAGE_OVERRIDES: Record<string, string> = {
   // She-Hulk Wikipedia thumbnails are either a show logo or a "various incarnations" collage —
   // use a Tatiana Maslany portrait directly.
   "She-Hulk":
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Tatiana_Maslany_by_Gage_Skidmore_2.jpg/330px-Tatiana_Maslany_by_Gage_Skidmore_2.jpg",
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Tatiana_Maslany_at_IGN_Live_2026.jpg/330px-Tatiana_Maslany_at_IGN_Live_2026.jpg",
 };
 
 function filenameLooksBad(url: string) {
@@ -174,6 +174,11 @@ const QUERY_OVERRIDES: Record<string, string[]> = {
 
 async function resolveImage(alias: string, name?: string): Promise<string | null> {
   const key = `${alias}|${name ?? ""}`;
+  const direct = DIRECT_IMAGE_OVERRIDES[alias];
+  if (direct) {
+    imageCache.set(key, direct);
+    return direct;
+  }
   if (imageCache.has(key)) return imageCache.get(key)!;
   if (inflight.has(key)) return inflight.get(key)!;
 
@@ -190,11 +195,6 @@ async function resolveImage(alias: string, name?: string): Promise<string | null
 
   const p = (async () => {
     try {
-      const direct = DIRECT_IMAGE_OVERRIDES[alias];
-      if (direct) {
-        imageCache.set(key, direct);
-        return direct;
-      }
       for (const t of terms) {
         const src = await fetchOne(t);
         if (src) {
