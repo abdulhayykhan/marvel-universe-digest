@@ -131,7 +131,7 @@ export const characters: Character[] = [
     bio: "Former KGB operative turned S.H.I.E.L.D. agent, Natasha Romanoff is a master spy and the lethal heart of the Avengers.",
     powers: ["Master Espionage", "Peak Human Combat", "Widow's Bite", "Marksmanship"],
     affiliation: ["Avengers", "S.H.I.E.L.D.", "Red Room"],
-    allies: ["hawkeye", "captain-america", "iron-man", "nick-fury", "bucky-barnes"],
+    allies: ["hawkeye", "captain-america", "iron-man", "nick-fury", "bucky-barnes", "yelena-belova"],
     enemies: ["thanos", "loki", "red-skull"],
     mcu_appearances: [
       { title: "Iron Man 2", year: 2010, role: "Supporting", actor: "Scarlett Johansson" },
