@@ -402,7 +402,7 @@ export const characters: Character[] = [
     bio: "Adopted daughter of Thanos and the deadliest woman in the galaxy, Gamora turned against her father to join the Guardians of the Galaxy.",
     powers: ["Cybernetic Enhancement", "Master Assassin", "Peak Combatant", "Godslayer"],
     affiliation: ["Guardians of the Galaxy"],
-    allies: ["star-lord", "rocket-raccoon", "groot", "nebula"],
+    allies: ["star-lord", "rocket-raccoon", "groot", "nebula", "drax", "mantis", "adam-warlock"],
     enemies: ["thanos", "ronan"],
     mcu_appearances: [
       { title: "Guardians of the Galaxy", year: 2014, role: "Lead", actor: "Zoe Saldana" },
