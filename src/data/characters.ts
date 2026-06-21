@@ -628,7 +628,7 @@ export const characters: Character[] = [
     bio: "Steve Rogers's childhood best friend turned brainwashed Hydra assassin, Bucky Barnes claws back his identity with a vibranium arm and a long ledger to clear.",
     powers: ["Vibranium Arm", "Enhanced Strength", "Master Assassin", "Marksmanship"],
     affiliation: ["Avengers", "Thunderbolts"],
-    allies: ["captain-america", "falcon", "black-widow"],
+    allies: ["captain-america", "falcon", "black-widow", "yelena-belova"],
     enemies: ["red-skull", "thanos"],
     mcu_appearances: [
       { title: "Captain America: The First Avenger", year: 2011, role: "Supporting", actor: "Sebastian Stan" },
