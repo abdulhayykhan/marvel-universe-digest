@@ -456,7 +456,7 @@ export const characters: Character[] = [
     bio: "Abducted from Earth as a kid and raised by space pirates, Peter Quill leads the Guardians of the Galaxy with a Walkman and a swagger.",
     powers: ["Celestial Lineage", "Elemental Blasters", "Tactical Combat", "Jet Boots"],
     affiliation: ["Guardians of the Galaxy", "Ravagers"],
-    allies: ["gamora", "rocket-raccoon", "groot", "thor"],
+    allies: ["gamora", "rocket-raccoon", "groot", "thor", "drax", "mantis", "adam-warlock", "yondu"],
     enemies: ["thanos", "ronan", "ego"],
     mcu_appearances: [
       { title: "Guardians of the Galaxy", year: 2014, role: "Lead", actor: "Chris Pratt" },
