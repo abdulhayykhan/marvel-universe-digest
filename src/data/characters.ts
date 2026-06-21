@@ -172,7 +172,7 @@ export const characters: Character[] = [
     powers: ["Wall-Crawling", "Spider-Sense", "Superhuman Agility", "Web-Shooters"],
     affiliation: ["Avengers"],
     allies: ["iron-man", "doctor-strange", "daredevil"],
-    enemies: ["green-goblin", "venom", "kingpin", "doctor-doom"],
+    enemies: ["green-goblin", "venom", "kingpin", "doctor-doom", "mysterio"],
     mcu_appearances: [
       { title: "Captain America: Civil War", year: 2016, role: "Supporting", actor: "Tom Holland" },
       { title: "Spider-Man: Homecoming", year: 2017, role: "Lead", actor: "Tom Holland" },
