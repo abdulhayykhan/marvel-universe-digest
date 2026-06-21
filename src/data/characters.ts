@@ -89,7 +89,7 @@ export const characters: Character[] = [
     bio: "Crown prince of Asgard and god of thunder, Thor wields the enchanted hammer Mjolnir and the axe Stormbreaker in defense of the Nine Realms.",
     powers: ["Godlike Strength", "Lightning Control", "Flight", "Mjolnir", "Stormbreaker"],
     affiliation: ["Avengers", "Asgard", "Guardians of the Galaxy"],
-    allies: ["iron-man", "captain-america", "hulk", "loki", "star-lord"],
+    allies: ["iron-man", "captain-america", "hulk", "loki", "star-lord", "valkyrie"],
     enemies: ["thanos", "loki", "ultron"],
     mcu_appearances: [
       { title: "Thor", year: 2011, role: "Lead", actor: "Chris Hemsworth" },
