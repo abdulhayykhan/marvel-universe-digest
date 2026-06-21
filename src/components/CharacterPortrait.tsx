@@ -218,13 +218,19 @@ export function CharacterPortrait({ alias, id, name, size = "card", className = 
   const palette = PALETTES[hash(id) % PALETTES.length];
   const text = initials(alias) || "??";
   const cacheKey = `${alias}|${name ?? ""}`;
-  const cached = imageCache.has(cacheKey) ? imageCache.get(cacheKey)! : undefined;
+  const directOverride = DIRECT_IMAGE_OVERRIDES[alias];
+  const cached = directOverride ?? (imageCache.has(cacheKey) ? imageCache.get(cacheKey)! : undefined);
 
   const [imgSrc, setImgSrc] = useState<string | null>(cached ?? null);
   const [imgOk, setImgOk] = useState<boolean>(!!cached);
 
   useEffect(() => {
     let cancelled = false;
+    if (directOverride) {
+      setImgSrc(directOverride);
+      setImgOk(true);
+      return;
+    }
     if (imageCache.has(cacheKey)) {
       const v = imageCache.get(cacheKey)!;
       setImgSrc(v);
@@ -247,7 +253,7 @@ export function CharacterPortrait({ alias, id, name, size = "card", className = 
     return () => {
       cancelled = true;
     };
-  }, [alias, name, cacheKey]);
+  }, [alias, name, cacheKey, directOverride]);
 
   const dims =
     size === "hero"
