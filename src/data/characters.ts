@@ -420,7 +420,7 @@ export const characters: Character[] = [
     bio: "A genetically engineered raccoon with a knack for heavy weaponry and heavier insults, Rocket is the Guardians' tactical brain and ordnance expert.",
     powers: ["Weapons Mastery", "Tactical Genius", "Engineering", "Marksmanship"],
     affiliation: ["Guardians of the Galaxy"],
-    allies: ["groot", "star-lord", "gamora", "thor"],
+    allies: ["groot", "star-lord", "gamora", "thor", "drax", "mantis", "yondu"],
     enemies: ["thanos", "high-evolutionary"],
     mcu_appearances: [
       { title: "Guardians of the Galaxy", year: 2014, role: "Lead", actor: "Bradley Cooper" },
