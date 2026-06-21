@@ -71,7 +71,7 @@ function BrowsePage() {
             </span>
           </h1>
           <p className="mt-4 max-w-2xl font-sans text-base text-marvel-white sm:text-lg">
-            40 heroes, villains, gods, mutants and cosmic weirdos. Search, filter, favorite,
+            58 heroes, villains, gods, mutants and cosmic weirdos. Search, filter, favorite,
             and pit them against each other.
           </p>
         </div>
